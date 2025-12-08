@@ -11,18 +11,14 @@ import {
     Send,
     User,
     Copy,
-
     X,
-
     Code,
     Sparkles,
     MessageSquare,
     RefreshCw,
-
     Settings,
     Zap,
     Brain,
-
     Search,
     Filter,
     Download,
@@ -121,7 +117,8 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
     const [filterType, setFilterType] = useState<string>("all");
     const [autoSave, setAutoSave] = useState(true);
     const [streamResponse, setStreamResponse] = useState(true);
-    const [model, setModel] = useState<string>("gpt-6");
+    // CHANGED: Default model is now qwen2.5-coder
+    const [model, setModel] = useState<string>("qwen2.5-coder:7b");
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -324,7 +321,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                                             checked={streamResponse}
                                             onCheckedChange={setStreamResponse}
                                         >
-                                            Stream responses
+                                           Stream responses
                                         </DropdownMenuCheckboxItem>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem onClick={exportChat}>
@@ -388,9 +385,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                                             onChange={(e) => setModel(e.target.value)}
                                             className="bg-zinc-900/60 border border-zinc-800 rounded px-2 py-1 text-zinc-200 focus:outline-none"
                                         >
-                                            <option value="gpt-6">gpt-6</option>
-                                            <option value="codellama">codellama</option>
-                                            <option value="llama2">llama2</option>
+                                            <option value="qwen2.5-coder:7b">qwen2.5-coder:7b</option>
                                         </select>
                                     </div>
                                     <div className="relative">
@@ -447,7 +442,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                                         <Brain className="h-8 w-8 text-zinc-400" />
                                     </div>
                                     <h3 className="text-xl font-semibold mb-3 text-zinc-300">
-                                        Enhanced AI Assistant
+                                        Enhanced AI Assistant (Qwen 2.5 Coder)
                                     </h3>
                                     <p className="text-zinc-400 max-w-md mx-auto leading-relaxed mb-6">
                                         Advanced AI coding assistant with comprehensive analysis
@@ -509,7 +504,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                                                     remarkPlugins={[remarkGfm, remarkMath]}
                                                     rehypePlugins={[rehypeKatex]}
                                                     components={{
-                                                        code: ({ children, className, inline }) => {
+                                                        code: ({ children, className, inline }: { children?: React.ReactNode; className?: string; inline?: boolean }) => {
                                                             if (inline) {
                                                                 return (
                                                                     <code className="bg-zinc-800 px-1 py-0.5 rounded text-sm">

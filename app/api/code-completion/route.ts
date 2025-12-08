@@ -19,6 +19,8 @@ interface CodeContext {
     isInClass: boolean
     isAfterComment: boolean
     incompletePatterns: string[]
+    fullContentBefore: string // Added for FIM
+    fullContentAfter: string  // Added for FIM
 }
 
 export async function POST(request: NextRequest) {
@@ -34,8 +36,8 @@ export async function POST(request: NextRequest) {
         // Analyze code context
         const context = analyzeCodeContext(fileContent, cursorLine, cursorColumn, fileName)
 
-        // Build AI prompt
-        const prompt = buildPrompt(context, suggestionType)
+        // Build AI prompt using Qwen FIM (Fill-In-the-Middle) format
+        const prompt = buildFIMPrompt(context)
 
         // Call AI service
         const suggestion = await generateSuggestion(prompt)
@@ -64,7 +66,17 @@ function analyzeCodeContext(content: string, line: number, column: number, fileN
     const lines = content.split("\n")
     const currentLine = lines[line] || ""
   
-    // Get surrounding context (10 lines before and after)
+    // Split content exactly at cursor position for FIM
+    let charCount = 0;
+    for(let i=0; i<line; i++) {
+        charCount += lines[i].length + 1; // +1 for newline
+    }
+    charCount += column;
+
+    const fullContentBefore = content.substring(0, charCount);
+    const fullContentAfter = content.substring(charCount);
+
+    // Get surrounding context (10 lines before and after) for Metadata only
     const contextRadius = 10
     const startLine = Math.max(0, line - contextRadius)
     const endLine = Math.min(lines.length, line + contextRadius)
@@ -93,36 +105,19 @@ function analyzeCodeContext(content: string, line: number, column: number, fileN
       isInClass,
       isAfterComment,
       incompletePatterns,
+      fullContentBefore,
+      fullContentAfter
     }
   }
   
   /**
-   * Build AI prompt based on context
+   * Build Prompt using Qwen/Starcoder FIM format
+   * <|fim_prefix|> content_before <|fim_suffix|> content_after <|fim_middle|>
    */
-  function buildPrompt(context: CodeContext, suggestionType: string): string {
-    return `You are an expert code completion assistant. Generate a ${suggestionType} suggestion.
-  
-  Language: ${context.language}
-  Framework: ${context.framework}
-  
-  Context:
-  ${context.beforeContext}
-  ${context.currentLine.substring(0, context.cursorPosition.column)}|CURSOR|${context.currentLine.substring(context.cursorPosition.column)}
-  ${context.afterContext}
-  
-  Analysis:
-  - In Function: ${context.isInFunction}
-  - In Class: ${context.isInClass}
-  - After Comment: ${context.isAfterComment}
-  - Incomplete Patterns: ${context.incompletePatterns.join(", ") || "None"}
-  
-  Instructions:
-  1. Provide only the code that should be inserted at the cursor
-  2. Maintain proper indentation and style
-  3. Follow ${context.language} best practices
-  4. Make the suggestion contextually appropriate
-  
-  Generate suggestion:`
+  function buildFIMPrompt(context: CodeContext): string {
+    // We trim specific markers to ensure the model connects smoothly
+    // Qwen 2.5 Coder works best with this specific format
+    return `<|fim_prefix|>${context.fullContentBefore}<|fim_suffix|>${context.fullContentAfter}<|fim_middle|>`
   }
   
   /**
@@ -134,39 +129,37 @@ function analyzeCodeContext(content: string, line: number, column: number, fileN
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // FIX 1: Using the specific model tag you downloaded
-          model: "codellama:7b",
-          prompt,
+          model: "qwen2.5-coder:7b",
+          prompt, // Sending the FIM formatted string
           stream: false,
           options: {
-            temperature: 0.7,
-            // FIX 2: Ollama uses 'num_predict' instead of 'max_tokens'
-            num_predict: 300,
+            temperature: 0.2, // Lower temperature for code completion to be more deterministic
+            num_predict: 50,  // Suggest short, concise completions (lines or blocks)
+            stop: ["<|file_separator|>", "\n\n\n"], // Stop tokens to prevent hallucinations
           },
+          // Raw mode is often required for FIM to prevent Ollama from adding its own formatting
+          raw: true 
         }),
       })
   
       if (!response.ok) {
-        const errorBody = await response.text(); // Get more details from the error
+        const errorBody = await response.text(); 
         throw new Error(`AI service error: ${response.statusText} - ${errorBody}`)
       }
   
       const data = await response.json()
       let suggestion = data.response
   
-      // Clean up the suggestion
+      // Clean up if the model outputs markdown blocks despite raw mode
       if (suggestion.includes("```")) {
         const codeMatch = suggestion.match(/```[\w]*\n?([\s\S]*?)```/)
-        suggestion = codeMatch ? codeMatch[1].trim() : suggestion
+        suggestion = codeMatch ? codeMatch[1] : suggestion
       }
-  
-      // Remove cursor markers if present
-      suggestion = suggestion.replace(/\|CURSOR\|/g, "").trim()
   
       return suggestion
     } catch (error) {
       console.error("AI generation error:", error)
-      return "// AI suggestion unavailable"
+      return "" // Return empty string on error so editor doesn't break
     }
   }
   
@@ -184,11 +177,13 @@ function analyzeCodeContext(content: string, line: number, column: number, fileN
         go: "Go",
         rs: "Rust",
         php: "PHP",
+        css: "CSS",
+        html: "HTML"
       }
       if (ext && extMap[ext]) return extMap[ext]
     }
   
-    // Content-based detection
+    // Content-based detection fallback
     if (content.includes("interface ") || content.includes(": string")) return "TypeScript"
     if (content.includes("def ") || content.includes("import ")) return "Python"
     if (content.includes("func ") || content.includes("package ")) return "Go"
@@ -239,12 +234,4 @@ function analyzeCodeContext(content: string, line: number, column: number, fileN
     if (/\.\s*$/.test(beforeCursor)) patterns.push("method-call")
   
     return patterns
-  }
-  
-  function getLastNonEmptyLine(lines: string[], currentLine: number): string {
-    for (let i = currentLine - 1; i >= 0; i--) {
-      const line = lines[i]
-      if (line.trim() !== "") return line
-    }
-    return ""
   }

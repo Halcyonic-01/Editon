@@ -5,22 +5,24 @@ interface ChatRequest {
     message: string;
     history: { role: "user" | "assistant"; content: string }[];
     stream?: boolean;
-    mode?: string; // e.g., "chat", "review", "fix"
+    mode?: string; // e.g., "chat", "review", "fix", "optimize"
+    model?: string;
 }
 
 // A simplified function to call the AI service for a chat response
-async function generateChatResponse(prompt: string): Promise<string> {
+async function generateChatResponse(prompt: string, systemPrompt: string): Promise<string> {
     try {
         const response = await fetch("http://localhost:11434/api/generate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                model: "codellama:7b", // Or any other model you prefer
-                prompt,
-                stream: false, // Streaming requires a different handler logic
+                model: "qwen2.5-coder:7b", 
+                prompt: prompt,
+                system: systemPrompt, // Qwen supports system prompts for context
+                stream: false, 
                 options: {
-                    temperature: 0.7,
-                    num_predict: 500, // Max tokens for a chat response
+                    temperature: 0.7, // Balanced creativity and precision
+                    num_ctx: 4096,    // Larger context window for analyzing code
                 },
             }),
         });
@@ -39,6 +41,26 @@ async function generateChatResponse(prompt: string): Promise<string> {
     }
 }
 
+function getSystemPrompt(mode: string): string {
+    const basePrompt = "You are an expert senior software engineer and coding assistant. You are helpful, concise, and precise.";
+    
+    switch (mode) {
+        case "review":
+            return `${basePrompt} Your task is to perform a Code Review. Analyze the provided code for:
+            1. Potential bugs or runtime errors.
+            2. Security vulnerabilities.
+            3. Code style and readability issues.
+            4. Best practice violations.
+            Provide your feedback in a structured markdown format.`;
+        case "fix":
+            return `${basePrompt} Your task is to Fix Code. Identify the error in the provided code/request and provide the corrected version. Explain what was wrong and how you fixed it. Prioritize correctness.`;
+        case "optimize":
+            return `${basePrompt} Your task is to Optimize Code. Analyze the code for time complexity and space complexity. Suggest improvements to make it faster, more memory efficient, or more readable. Provide the optimized code block.`;
+        case "chat":
+        default:
+            return `${basePrompt} Answer the user's coding questions. If they ask for code, provide it in markdown code blocks.`;
+    }
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -50,26 +72,26 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Message is required" }, { status: 400 });
         }
 
-        // 2. Build a prompt for the AI model
-        // We can create a more sophisticated prompt based on history and mode
-        const prompt = `
-            You are a helpful AI assistant.
-            Previous conversation:
-            ${history.map(h => `${h.role}: ${h.content}`).join('\n')}
-
-            Current user message: ${message}
-            Assistant:
+        // 2. Build the context and prompt
+        // We structure the prompt to include history manually if the API is stateless per request
+        const conversationHistory = history.map(h => `${h.role === 'user' ? 'User' : 'Assistant'}: ${h.content}`).join('\n');
+        
+        const fullPrompt = `
+        ${conversationHistory}
+        User: ${message}
+        Assistant:
         `;
 
+        const systemInstruction = getSystemPrompt(mode || "chat");
 
         // 3. Call the AI service to get a response
-        const aiResponse = await generateChatResponse(prompt);
+        const aiResponse = await generateChatResponse(fullPrompt, systemInstruction);
 
         // 4. Send the successful response back to the frontend
         return NextResponse.json({
             response: aiResponse,
-            tokens: Math.round(aiResponse.length / 4), // Simple token estimation
-            model: "codellama:7b",
+            tokens: Math.round(aiResponse.length / 4), 
+            model: "qwen2.5-coder:7b",
         });
 
     } catch (error: any) {
