@@ -41,7 +41,7 @@ export function Header() {
                     />
 
                     <span className="hidden sm:block font-extrabold text-lg">
-                      VibeCode Editor
+                      Edition
                     </span>
                   </Link>
                   <span className="text-zinc-300 dark:text-zinc-700">|</span>
