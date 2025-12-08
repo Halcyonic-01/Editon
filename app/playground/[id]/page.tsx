@@ -57,6 +57,7 @@ const MainPlaygroundPage = () => {
     error: containerError,
     instance,
     writeFileSync,
+    isReady: containerReady,
     // @ts-ignore
   } = useWebContainer({ templateData });
 
@@ -192,8 +193,8 @@ const MainPlaygroundPage = () => {
         }
 
         // Use saveTemplateData to persist changes
-        const newTemplateData = await saveTemplateData(updatedTemplateData);
-        setTemplateData(newTemplateData || updatedTemplateData);
+        await saveTemplateData(updatedTemplateData);
+        setTemplateData(updatedTemplateData);
 
         // Update open files
         const updatedOpenFiles = openFiles.map((f) =>
@@ -482,7 +483,7 @@ const MainPlaygroundPage = () => {
                                 templateData={templateData}
                                 instance={instance}
                                 writeFileSync={writeFileSync}
-                                isLoading={containerLoading}
+                                isLoading={containerLoading || false}
                                 error={containerError}
                                 serverUrl={serverUrl!}
                                 forceResetup={false}

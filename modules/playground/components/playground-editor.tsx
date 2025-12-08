@@ -505,21 +505,21 @@ export const PlaygroundEditor = ({
   }, [activeFile])
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (suggestionTimeoutRef.current) {
-        clearTimeout(suggestionTimeoutRef.current)
-      }
-      if (inlineCompletionProviderRef.current) {
-        inlineCompletionProviderRef.current.dispose()
-        inlineCompletionProviderRef.current = null
-      }
-      if (tabCommandRef.current) {
-        tabCommandRef.current.dispose()
-        tabCommandRef.current = null
-      }
+  // Cleanup on unmount
+useEffect(() => {
+  return () => {
+    if (suggestionTimeoutRef.current) {
+      clearTimeout(suggestionTimeoutRef.current)
     }
-  }, [])
+    if (inlineCompletionProviderRef.current) {
+      inlineCompletionProviderRef.current.dispose()
+      inlineCompletionProviderRef.current = null
+    }
+    if (tabCommandRef.current) {
+      tabCommandRef.current = null 
+    }
+  }
+}, [])
 
   return (
     <div className="h-full relative">
