@@ -30,7 +30,7 @@ const Page = async () => {
                             }))}
                             onDeleteProject={deleteProjectById}
                             onUpdateProject={editProjectById}
-                            onDuplicateProject={async (id) => { await duplicateProjectById(id) }}
+                            onDuplicateProject={duplicateProjectById}
                         />
                     )
                 }
