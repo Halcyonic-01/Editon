@@ -10,9 +10,13 @@ interface AISuggestionsState {
 
 interface UseAISuggestionsReturn extends AISuggestionsState {
     toggleEnabled: () => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fetchSuggestion: (type: string, editor: any) => Promise<void>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     acceptSuggestion: (editor: any, monaco: any) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     rejectSuggestion: (editor: any) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     clearSuggestion: (editor: any) => void;
 }
 
@@ -30,6 +34,7 @@ export const useAISuggestions = (): UseAISuggestionsReturn => {
         setState((prev) => ({ ...prev, isEnabled: !prev.isEnabled }));
     }, []);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const fetchSuggestion = useCallback(async (type: string, editor: any) => {
         setState((currentState) => {
             if (!currentState.isEnabled) {
@@ -104,6 +109,7 @@ export const useAISuggestions = (): UseAISuggestionsReturn => {
     }, [])
 
     const acceptSuggestion = useCallback(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (editor: any, monaco: any) => {
             setState((currentState) => {
                 if (!currentState.suggestion || !currentState.position || !editor || !monaco) {
@@ -137,6 +143,7 @@ export const useAISuggestions = (): UseAISuggestionsReturn => {
         []
     );
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rejectSuggestion = useCallback((editor: any) => {
         setState((currentState) => {
             if (editor && currentState.decoration.length > 0) {
@@ -151,6 +158,7 @@ export const useAISuggestions = (): UseAISuggestionsReturn => {
         });
     }, []);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const clearSuggestion = useCallback((editor: any) => {
         setState((currentState) => {
             if (editor && currentState.decoration.length > 0) {

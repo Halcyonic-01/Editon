@@ -49,8 +49,8 @@ const AddRepo = () => {
 
       toast.success("Repository opened successfully!");
       router.push(`/playground/${playground.id}`);
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setIsLoading(false);
       setIsOpen(false);

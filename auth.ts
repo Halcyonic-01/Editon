@@ -22,7 +22,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                   image: user.image,
                  
                   accounts: {
-                    // @ts-ignore
+                    // @ts-expect-error prisma adapter type mismatch
                     create: {
                       type: account.type,
                       provider: account.provider,
@@ -65,7 +65,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                     tokenType: account.token_type,
                     scope: account.scope,
                     idToken: account.id_token,
-                    // @ts-ignore
+                    // @ts-expect-error prisma adapter type mismatch
                     sessionState: account.session_state,
                   },
                 });

@@ -16,6 +16,7 @@ import { SearchAddon } from "xterm-addon-search";
 interface TerminalProps {
   className?: string;
   theme?: "dark" | "light";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   webContainerInstance?: any;
 }
 
@@ -34,6 +35,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
   const term = useRef<Terminal | null>(null);
   const fitAddon = useRef<FitAddon | null>(null);
   const searchAddon = useRef<SearchAddon | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const shellProcessRef = useRef<any>(null);
   const isShellStarting = useRef(false);
 
@@ -142,7 +144,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
               }
             },
           })
-        ).catch((error: any) => {
+        ).catch((error: unknown) => {
           console.error("Output pipe error:", error);
         });
 
@@ -172,14 +174,14 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(({
         });
 
         // Handle process exit
-        shellProcess.exit.then((code: any) => {
+        shellProcess.exit.then((code: number) => {
           if (term.current) {
             terminal.write(`\r\n\x1b[33mShell exited with code ${code}\x1b[0m\r\n`);
           }
           dataListener.dispose();
           resizeListener.dispose();
           shellProcessRef.current = null;
-        }).catch((error: any) => {
+        }).catch((error: unknown) => {
           console.error("Shell exit error:", error);
         });
 

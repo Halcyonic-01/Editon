@@ -12,8 +12,11 @@ interface PlaygroundEditorProps {
   suggestion: string | null
   suggestionLoading: boolean
   suggestionPosition: { line: number; column: number } | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onAcceptSuggestion: (editor: any, monaco: any) => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onRejectSuggestion: (editor: any) => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onTriggerSuggestion: (type: string, editor: any) => void
 }
 
@@ -28,8 +31,10 @@ export const PlaygroundEditor = ({
   onRejectSuggestion,
   onTriggerSuggestion,
 }: PlaygroundEditorProps) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const editorRef = useRef<any>(null)
   const monacoRef = useRef<Monaco | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const inlineCompletionProviderRef = useRef<any>(null)
   const currentSuggestionRef = useRef<{
     text: string
@@ -39,6 +44,7 @@ export const PlaygroundEditor = ({
   const isAcceptingSuggestionRef = useRef(false)
   const suggestionAcceptedRef = useRef(false)
   const suggestionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tabCommandRef = useRef<any>(null)
 
   // Generate unique ID for each suggestion
@@ -48,6 +54,7 @@ export const PlaygroundEditor = ({
   const createInlineCompletionProvider = useCallback(
     (monaco: Monaco) => {
       return {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         provideInlineCompletions: async (model: any, position: any, context: any, token: any) => {
           console.log("provideInlineCompletions called", {
             hasSuggestion: !!suggestion,
@@ -120,9 +127,11 @@ export const PlaygroundEditor = ({
             ],
           }
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         freeInlineCompletions: (completions: any) => {
           console.log("freeInlineCompletions called")
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         disposeInlineCompletions: (completions: any, reason: any) => {
           console.log("disposeInlineCompletions called", { reason })
         },
@@ -309,6 +318,7 @@ export const PlaygroundEditor = ({
     }
   }, [suggestion, suggestionPosition, activeFile, createInlineCompletionProvider])
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleEditorDidMount = (editor: any, monaco: Monaco) => {
     editorRef.current = editor
     monacoRef.current = monaco
@@ -403,6 +413,7 @@ export const PlaygroundEditor = ({
     })
 
     // Listen for cursor position changes to hide suggestions when moving away
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     editor.onDidChangeCursorPosition((e: any) => {
       if (isAcceptingSuggestionRef.current) return
 
@@ -439,6 +450,7 @@ export const PlaygroundEditor = ({
     })
 
     // Listen for content changes to detect manual typing over suggestions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     editor.onDidChangeModelContent((e: any) => {
       if (isAcceptingSuggestionRef.current) return
 

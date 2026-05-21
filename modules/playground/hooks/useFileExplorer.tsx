@@ -32,12 +32,14 @@ interface FileExplorerState {
         newFile: TemplateFile,
         parentPath: string,
         writeFileSync: (filePath: string, content: string) => Promise<void>,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         instance: any,
         saveTemplateData: (data: TemplateFolder) => Promise<void>
     ) => Promise<void>;
     handleAddFolder: (
         newFolder: TemplateFolder,
         parentPath: string,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         instance: any,
         saveTemplateData: (data: TemplateFolder) => Promise<void>
     ) => Promise<void>;
@@ -66,7 +68,6 @@ interface FileExplorerState {
     ) => Promise<void>;
     updateFileContent: (fileId: string, content: string) => void;
 }
-// @ts-ignore
 export const useFileExplorer = create<FileExplorerState>((set, get) => ({
     templateData: null,
     playgroundId: "",

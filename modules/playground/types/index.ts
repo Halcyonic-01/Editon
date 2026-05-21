@@ -6,7 +6,7 @@ export interface TemplateFile {
   export interface PlaygroundData {
     id: string;
     name?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   }
   
   export interface TemplateFolder {

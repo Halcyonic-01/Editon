@@ -7,7 +7,7 @@ import { getPlaygroundById, SaveUpdatedCode } from "../actions";
 interface PlaygroundData {
     id: string;
     title?: string,
-    [key: string]: any
+    [key: string]: unknown
 }
 
 interface UsePlaygroundReturn {
@@ -32,7 +32,7 @@ export const usePlayground = (id: string): UsePlaygroundReturn => {
             setIsLoading(true)
             setError(null)
             const data = await getPlaygroundById(id)
-            //@ts-ignore
+            // @ts-expect-error server action return type
             setPlaygroundData(data)
             const rawContent = data?.TemplateFile?.content
             if (typeof rawContent === "string") {

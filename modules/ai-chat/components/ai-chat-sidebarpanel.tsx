@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import "katex/dist/katex.min.css";
 import Image from "next/image";
-import { tr } from "date-fns/locale";
+
 
 interface ChatMessage {
     role: "user" | "assistant";
@@ -348,7 +348,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                         {/* Enhanced Controls */}
                         <Tabs
                             value={chatMode}
-                            onValueChange={(value) => setChatMode(value as any)}
+                            onValueChange={(value) => setChatMode(value as "chat" | "review" | "fix" | "optimize")}
                             className="px-6"
                         >
                             <div className="flex items-center justify-between mb-4">
@@ -610,7 +610,7 @@ export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
                                     onChange={(e) => setInput(e.target.value)}
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                                            handleSendMessage(e as any);
+                                            handleSendMessage(e as unknown as React.FormEvent);
                                         }
                                     }}
                                     disabled={isLoading}
