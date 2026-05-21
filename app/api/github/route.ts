@@ -37,7 +37,6 @@ async function fetchRepoContents(owner: string, repo: string, path: string = "")
         
         // 1. Try standard content
         if (item.content) {
-             // @ts-expect-error content field exists at runtime
             content = Buffer.from(item.content, "base64").toString("utf-8");
         } 
         // 2. Try fetching blob (for files 1MB-100MB)
