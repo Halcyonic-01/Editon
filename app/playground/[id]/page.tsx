@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { TemplateFileTree } from '@/modules/playground/components/playground-explorer'
 import { useFileExplorer } from '@/modules/playground/hooks/useFileExplorer'
 import { TemplateFile, TemplateFolder } from '@/modules/playground/lib/path-to-json'
-import { AlertCircle, Bot, FileText, FolderOpen, Save, Settings, X } from 'lucide-react'
+import { AlertCircle, FileText, FolderOpen, Save, Settings, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -36,7 +36,6 @@ const MainPlaygroundPage = () => {
     closeAllFiles,
     openFile,
     closeFile,
-    editorContent,
     updateFileContent,
     handleAddFile,
     handleAddFolder,
@@ -57,8 +56,7 @@ const MainPlaygroundPage = () => {
     error: containerError,
     instance,
     writeFileSync,
-    isReady: containerReady,
-    // @ts-ignore
+    // @ts-expect-error
   } = useWebContainer({ templateData });
 
   const lastSyncedContent = useRef<Map<string, string>>(new Map());
@@ -167,7 +165,7 @@ const MainPlaygroundPage = () => {
         const updatedTemplateData = JSON.parse(
           JSON.stringify(latestTemplateData)
         );
-        const updateFileContent = (items: any[]): any[] =>
+        const updateFileContent = (items: (TemplateFile | TemplateFolder)[]): (TemplateFile | TemplateFolder)[] =>
           items.map((item) => {
             if ("folderName" in item) {
               return { ...item, items: updateFileContent(item.items) };
@@ -242,7 +240,7 @@ const MainPlaygroundPage = () => {
     try {
       await Promise.all(unsavedFiles.map((f) => handleSave(f.id)));
       toast.success(`Saved ${unsavedFiles.length} file(s)`);
-    } catch (error) {
+    } catch {
       toast.error("Failed to save some files");
     }
   };
@@ -458,7 +456,7 @@ const MainPlaygroundPage = () => {
                           activeFile={activeFile}
                           content={activeFile?.content || ""}
                           onContentChange={(value) => {
-                            activeFileId && updateFileContent(activeFileId, value)
+                            if (activeFileId) updateFileContent(activeFileId, value)
                           }}
                           suggestion={aiSuggestions.suggestion}
                         suggestionLoading={aiSuggestions.isLoading}

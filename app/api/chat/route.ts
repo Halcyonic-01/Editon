@@ -94,10 +94,10 @@ export async function POST(request: NextRequest) {
             model: "qwen2.5-coder:7b",
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Chat API error:", error);
         return NextResponse.json(
-            { error: "Internal server error", message: error.message },
+            { error: "Internal server error", message: error instanceof Error ? error.message : "Unknown error" },
             { status: 500 }
         );
     }

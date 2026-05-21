@@ -37,7 +37,7 @@ async function fetchRepoContents(owner: string, repo: string, path: string = "")
         
         // 1. Try standard content
         if (item.content) {
-             // @ts-ignore
+             // @ts-expect-error
             content = Buffer.from(item.content, "base64").toString("utf-8");
         } 
         // 2. Try fetching blob (for files 1MB-100MB)
@@ -47,7 +47,7 @@ async function fetchRepoContents(owner: string, repo: string, path: string = "")
                     owner, repo, file_sha: item.sha,
                 });
                 content = Buffer.from(blobData.content, "base64").toString("utf-8");
-            } catch (blobError) {
+            } catch {
                 console.warn(`Skipping large/binary file: ${item.path}`);
                 continue; 
             }
@@ -57,7 +57,7 @@ async function fetchRepoContents(owner: string, repo: string, path: string = "")
         if (item.name === "package.json") {
              try {
                  JSON.parse(content); // Validate JSON
-             } catch (e) {
+             } catch {
                  console.error("Invalid package.json found, skipping to avoid crash");
                  continue;
              }
