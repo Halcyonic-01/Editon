@@ -44,6 +44,7 @@ const WebContainerPreview = ({
   const [isSetupComplete, setIsSetupComplete] = useState(false);
   const [isSetupInProgress, setIsSetupInProgress] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const terminalRef = useRef<any>(null);
 
   // Reset state if forceResetup is triggered
@@ -94,7 +95,7 @@ const WebContainerPreview = ({
         setCurrentStep(1);
         terminalRef.current?.writeToTerminal("📦 Preparing file system...\r\n");
         
-        // @ts-ignore
+        // @ts-expect-error templateData type mismatch with transformer
         const files = transformToWebContainerFormat(templateData);
         
         // --- STEP 2: MOUNT ---
@@ -165,9 +166,9 @@ const WebContainerPreview = ({
         setIsSetupComplete(true);
         setIsSetupInProgress(false);
 
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("WebContainer Setup Error:", err);
-        const msg = err.message || "Unknown error during setup";
+        const msg = err instanceof Error ? err.message : "Unknown error during setup";
         setInternalError(msg);
         terminalRef.current?.writeToTerminal(`\r\n❌ Fatal Error: ${msg}\r\n`);
         setIsSetupInProgress(false);
